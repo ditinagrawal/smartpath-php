@@ -30,7 +30,7 @@ class Webinar extends Model
     public function getImageUrlAttribute()
     {
         if ($this->image) {
-            return asset('public/storage/' . $this->image);
+            return asset('public/' . $this->image);
         }
         return null;
     }

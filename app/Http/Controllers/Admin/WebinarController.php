@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Webinar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class WebinarController extends Controller
 {
@@ -44,7 +44,17 @@ class WebinarController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('webinars', 'public');
+            $image = $request->file('image');
+            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $imageDir = public_path('images/webinars');
+            
+            // Create directory if it doesn't exist
+            if (!File::exists($imageDir)) {
+                File::makeDirectory($imageDir, 0755, true);
+            }
+            
+            $image->move($imageDir, $imageName);
+            $imagePath = 'images/webinars/' . $imageName;
         }
 
         Webinar::create([
@@ -103,16 +113,27 @@ class WebinarController extends Controller
         // Handle image upload
         if ($request->hasFile('image')) {
             // Delete old image if exists
-            if ($webinar->image) {
-                Storage::disk('public')->delete($webinar->image);
+            if ($webinar->image && File::exists(public_path($webinar->image))) {
+                File::delete(public_path($webinar->image));
             }
-            $imagePath = $request->file('image')->store('webinars', 'public');
+            
+            $image = $request->file('image');
+            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $imageDir = public_path('images/webinars');
+            
+            // Create directory if it doesn't exist
+            if (!File::exists($imageDir)) {
+                File::makeDirectory($imageDir, 0755, true);
+            }
+            
+            $image->move($imageDir, $imageName);
+            $imagePath = 'images/webinars/' . $imageName;
         }
         
         // Handle image removal
         if ($request->has('remove_image') && $request->remove_image) {
-            if ($webinar->image) {
-                Storage::disk('public')->delete($webinar->image);
+            if ($webinar->image && File::exists(public_path($webinar->image))) {
+                File::delete(public_path($webinar->image));
             }
             $imagePath = null;
         }
@@ -141,8 +162,8 @@ class WebinarController extends Controller
         $webinar = Webinar::findOrFail($id);
         
         // Delete image if exists
-        if ($webinar->image) {
-            Storage::disk('public')->delete($webinar->image);
+        if ($webinar->image && File::exists(public_path($webinar->image))) {
+            File::delete(public_path($webinar->image));
         }
         
         $webinar->delete();

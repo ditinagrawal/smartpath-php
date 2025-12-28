@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class BlogController extends Controller
 {
@@ -41,7 +41,17 @@ class BlogController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('blogs', 'public');
+            $image = $request->file('image');
+            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $imageDir = public_path('images/blogs');
+            
+            // Create directory if it doesn't exist
+            if (!File::exists($imageDir)) {
+                File::makeDirectory($imageDir, 0755, true);
+            }
+            
+            $image->move($imageDir, $imageName);
+            $imagePath = 'images/blogs/' . $imageName;
         }
 
         Blog::create([
@@ -94,16 +104,27 @@ class BlogController extends Controller
         // Handle image upload
         if ($request->hasFile('image')) {
             // Delete old image if exists
-            if ($blog->image) {
-                Storage::disk('public')->delete($blog->image);
+            if ($blog->image && File::exists(public_path($blog->image))) {
+                File::delete(public_path($blog->image));
             }
-            $imagePath = $request->file('image')->store('blogs', 'public');
+            
+            $image = $request->file('image');
+            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $imageDir = public_path('images/blogs');
+            
+            // Create directory if it doesn't exist
+            if (!File::exists($imageDir)) {
+                File::makeDirectory($imageDir, 0755, true);
+            }
+            
+            $image->move($imageDir, $imageName);
+            $imagePath = 'images/blogs/' . $imageName;
         }
         
         // Handle image removal
         if ($request->has('remove_image') && $request->remove_image) {
-            if ($blog->image) {
-                Storage::disk('public')->delete($blog->image);
+            if ($blog->image && File::exists(public_path($blog->image))) {
+                File::delete(public_path($blog->image));
             }
             $imagePath = null;
         }
@@ -129,8 +150,8 @@ class BlogController extends Controller
         $blog = Blog::findOrFail($id);
         
         // Delete image if exists
-        if ($blog->image) {
-            Storage::disk('public')->delete($blog->image);
+        if ($blog->image && File::exists(public_path($blog->image))) {
+            File::delete(public_path($blog->image));
         }
         
         $blog->delete();
