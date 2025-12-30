@@ -442,7 +442,7 @@
                 <div class="it-footer-list">
                   <ul>
                     <li>
-                      <a href="#"
+                      <a href="/about"
                         ><i class="fa-regular fa-angle-right"></i>Study in
                         India</a
                       >
@@ -463,7 +463,7 @@
                       >
                     </li>
                     <li>
-                      <a href="#"
+                      <a href="/study-abroad-guidance"
                         ><i class="fa-regular fa-angle-right"></i>Study
                         Abroad</a
                       >

@@ -59,8 +59,52 @@ if (!function_exists('serveSmartPathHtml')) {
             $content = str_replace("href='" . $oldLink, "href='" . $newLink, $content);
         }
         
+        // Fix footer "Our Services" links - replace broken links with correct routes
+        $footerServiceLinks = [
+            'href="services-1.html"' => 'href="/about"', // Study in India
+            "href='services-1.html'" => "href='/about'",
+            'href="services-2.html"' => 'href="/mbbs-india"', // MBBS
+            "href='services-2.html'" => "href='/mbbs-india'",
+            'href="services-3.html"' => 'href="/mba-india"', // MBA
+            "href='services-3.html'" => "href='/mba-india'",
+            'href="study-in-india.html"' => 'href="/about"',
+            "href='study-in-india.html'" => "href='/about'",
+            'href="study-abroad.html"' => 'href="/study-abroad-guidance"',
+            "href='study-abroad.html'" => "href='/study-abroad-guidance'",
+            'href="engineering-india.html"' => 'href="/engineering-india"',
+            "href='engineering-india.html'" => "href='/engineering-india'",
+            'href="mbbs-india.html"' => 'href="/mbbs-india"',
+            "href='mbbs-india.html'" => "href='/mbbs-india'",
+            'href="mba-india.html"' => 'href="/mba-india"',
+            "href='mba-india.html'" => "href='/mba-india'",
+        ];
+        
+        // Replace footer service links
+        foreach ($footerServiceLinks as $oldLink => $newLink) {
+            $content = str_replace($oldLink, $newLink, $content);
+        }
+        
+        // Fix Quick Links footer section
+        $quickLinksMap = [
+            'href="about-us.html"' => 'href="/about"',
+            "href='about-us.html'" => "href='/about'",
+            'href="webinars.html"' => 'href="/webinars"',
+            "href='webinars.html'" => "href='/webinars'",
+            'href="blog.html"' => 'href="/news"',
+            "href='blog.html'" => "href='/news'",
+            'href="news.html"' => 'href="/news"',
+            "href='news.html'" => "href='/news'",
+            'href="contact.html"' => 'href="/contact"',
+            "href='contact.html'" => "href='/contact'",
+        ];
+        
+        foreach ($quickLinksMap as $oldLink => $newLink) {
+            $content = str_replace($oldLink, $newLink, $content);
+        }
+        
         // Fix other HTML links (remove .html extension for catch-all route)
         // Only match href attributes, not src (to avoid affecting images/CSS/JS)
+        // But exclude the ones we've already fixed above
         $content = preg_replace('/href=["\']([^"\']+)\.html([^"\']*)["\']/', 'href="$1$2"', $content);
 
         // Inject dynamic latest news blogs into the homepage
