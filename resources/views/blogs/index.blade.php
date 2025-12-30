@@ -178,7 +178,7 @@
                                         <a href="{{ url('/news/' . $blog->slug) }}">{{ $blog->title }}</a>
                                     </h3>
                                     <div class="blog-meta">
-                                        <span class="blog-category">{{ $blog->category }}</span>
+                                        <span class="blog-category">{{ $blog->category?->name ?? 'Uncategorized' }}</span>
                                         <span class="divider"></span>
                                         <span class="blog-date">{{ $blog->created_at?->format('F d, Y') ?? 'Recently' }}</span>
                                     </div>

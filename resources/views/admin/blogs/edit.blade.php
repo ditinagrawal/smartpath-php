@@ -109,11 +109,23 @@
                     <div class="card-body">
                         <!-- Category -->
                         <div class="form-group">
-                            <label for="category">Category <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('category') is-invalid @enderror" id="category" name="category" value="{{ old('category', $blog->category) }}" placeholder="e.g., Technology, Business, Development" required>
-                            @error('category')
+                            <label for="category_id">Category <span class="text-danger">*</span></label>
+                            <select class="form-control @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
+                                <option value="">Select a category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id', $blog->category_id) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category_id')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                            <small class="form-text text-muted">
+                                <a href="{{ route('admin.categories.create') }}" target="_blank">
+                                    <i class="fas fa-plus"></i> Create a new category
+                                </a>
+                            </small>
                         </div>
 
                         <!-- Published -->

@@ -331,7 +331,7 @@
               <div class="it-breadcrumb-content z-index-3 text-center">
                 <div class="it-breadcrumb-title-box">
                   <h3 class="it-breadcrumb-title" style="margin-top: 100px">
-                    {{ strtoupper($blog->category ?? 'NEWS') }} DETAILS
+                    {{ strtoupper($blog->category?->name ?? 'NEWS') }} DETAILS
                   </h3>
                 </div>
               </div>
@@ -362,7 +362,7 @@
                         ><i class="fa-solid fa-calendar-days"></i>{{ $blog->created_at->format('d F Y') }}</span
                       >
                       <span
-                        ><i class="fa-regular fa-comments"></i>{{ $blog->category ?? 'News' }}</span
+                        ><i class="fa-regular fa-comments"></i>{{ $blog->category?->name ?? 'News' }}</span
                       >
                     </div>
                     <h4 class="postbox__title mb-20">
@@ -382,7 +382,7 @@
                       <div class="col-xl-7 col-lg-7 col-md-7">
                         <div class="postbox__details-tag">
                           <span>Posted in:</span>
-                          <a href="#">{{ $blog->category ?? 'News' }}</a>
+                          <a href="#">{{ $blog->category?->name ?? 'News' }}</a>
                         </div>
                       </div>
                       <div class="col-xl-5 col-lg-5 col-md-5">

@@ -48,7 +48,13 @@
                                     <small class="text-muted">{{ $blog->slug }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge badge-info">{{ $blog->category }}</span>
+                                    @if($blog->category_id && $blog->relationLoaded('category') && $blog->category)
+                                        <span class="badge badge-info">{{ $blog->category->name }}</span>
+                                    @elseif(isset($blog->attributes['category']) && $blog->attributes['category'])
+                                        <span class="badge badge-info">{{ $blog->attributes['category'] }}</span>
+                                    @else
+                                        <span class="badge badge-secondary">No Category</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($blog->is_published)

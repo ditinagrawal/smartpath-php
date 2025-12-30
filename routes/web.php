@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\WebinarController as AdminWebinarController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use App\Models\Blog;
 use App\Models\Webinar;
@@ -64,11 +65,31 @@ if (!function_exists('serveSmartPathHtml')) {
 
         // Inject dynamic latest news blogs into the homepage
         if ($htmlFile === 'index.html') {
-            $newsBlogs = Blog::where('is_published', true)
-                ->where('category', 'News')
-                ->latest()
-                ->take(3)
-                ->get();
+            try {
+                // Check if categories table exists
+                if (Schema::hasTable('categories')) {
+                    $newsBlogs = Blog::with('category')
+                        ->where('is_published', true)
+                        ->whereHas('category', function($query) {
+                            $query->where('name', 'News');
+                        })
+                        ->latest()
+                        ->take(3)
+                        ->get();
+                } else {
+                    // Fallback: get blogs with category column (old way) or just latest blogs
+                    $newsBlogs = Blog::where('is_published', true)
+                        ->latest()
+                        ->take(3)
+                        ->get();
+                }
+            } catch (\Exception $e) {
+                // Fallback if there's any error
+                $newsBlogs = Blog::where('is_published', true)
+                    ->latest()
+                    ->take(3)
+                    ->get();
+            }
 
             $cardsHtml = '';
 
@@ -93,7 +114,7 @@ if (!function_exists('serveSmartPathHtml')) {
                     </span>
                     <span>
                       <i class="fa-light fa-messages"></i>
-                      ' . e($blog->category ?? 'News') . '
+                      ' . e(is_object($blog->category) ? ($blog->category->name ?? 'News') : ($blog->category ?? 'News')) . '
                     </span>
                   </div>
                   <h4 class="it-blog-title">
@@ -131,9 +152,25 @@ if (!function_exists('serveSmartPathHtml')) {
         
         // Inject dynamic blogs into the news page
         if ($htmlFile === 'news.html') {
-            $allBlogs = Blog::where('is_published', true)
-                ->latest()
-                ->get();
+            try {
+                // Check if categories table exists
+                if (Schema::hasTable('categories')) {
+                    $allBlogs = Blog::with('category')
+                        ->where('is_published', true)
+                        ->latest()
+                        ->get();
+                } else {
+                    // Fallback: get blogs without category relationship
+                    $allBlogs = Blog::where('is_published', true)
+                        ->latest()
+                        ->get();
+                }
+            } catch (\Exception $e) {
+                // Fallback if there's any error
+                $allBlogs = Blog::where('is_published', true)
+                    ->latest()
+                    ->get();
+            }
 
             $blogsHtml = '';
 
@@ -151,7 +188,7 @@ if (!function_exists('serveSmartPathHtml')) {
                   <div class="postbox__content-box">
                     <div class="postbox__meta">
                       <span><i class="fa-light fa-calendar-days"></i>' . e($date) . '</span>
-                      <span><i class="fal fa-user"></i>' . e($blog->category ?? 'News') . '</span>
+                      <span><i class="fal fa-user"></i>' . e(is_object($blog->category) ? ($blog->category->name ?? 'News') : ($blog->category ?? 'News')) . '</span>
                     </div>
                     <h4 class="postbox__details-title">
                       <a href="' . e($blogUrl) . '">' . e($blog->title) . '</a>
@@ -308,6 +345,7 @@ Route::get('/blogs/{slug}', function ($slug) {
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('blogs', AdminBlogController::class);
     Route::resource('webinars', AdminWebinarController::class);
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 });
 
 // Catch-all route for other HTML pages in smartpath (must be last)

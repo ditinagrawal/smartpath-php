@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
@@ -15,7 +16,7 @@ class BlogController extends Controller
      */
     public function index()
     {
-        $blogs = Blog::latest()->paginate(10);
+        $blogs = Blog::with('category')->latest()->paginate(10);
         return view('admin.blogs.index', compact('blogs'));
     }
 
@@ -24,7 +25,8 @@ class BlogController extends Controller
      */
     public function create()
     {
-        return view('admin.blogs.create');
+        $categories = Category::orderBy('name')->get();
+        return view('admin.blogs.create', compact('categories'));
     }
 
     /**
@@ -35,7 +37,7 @@ class BlogController extends Controller
         $request->validate([
             'title' => 'required|max:255',
             'content' => 'required',
-            'category' => 'required|max:100',
+            'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -59,7 +61,7 @@ class BlogController extends Controller
             'slug' => Str::slug($request->input('title')),
             'excerpt' => $request->input('excerpt'),
             'content' => $request->input('content'),
-            'category' => $request->input('category'),
+            'category_id' => $request->input('category_id'),
             'is_published' => $request->has('is_published'),
             'image' => $imagePath,
         ]);
@@ -82,7 +84,8 @@ class BlogController extends Controller
     public function edit(string $id)
     {
         $blog = Blog::findOrFail($id);
-        return view('admin.blogs.edit', compact('blog'));
+        $categories = Category::orderBy('name')->get();
+        return view('admin.blogs.edit', compact('blog', 'categories'));
     }
 
     /**
@@ -93,7 +96,7 @@ class BlogController extends Controller
         $request->validate([
             'title' => 'required|max:255',
             'content' => 'required',
-            'category' => 'required|max:100',
+            'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -134,7 +137,7 @@ class BlogController extends Controller
             'slug' => Str::slug($request->input('title')),
             'excerpt' => $request->input('excerpt'),
             'content' => $request->input('content'),
-            'category' => $request->input('category'),
+            'category_id' => $request->input('category_id'),
             'is_published' => $request->has('is_published'),
             'image' => $imagePath,
         ]);
