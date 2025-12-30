@@ -333,6 +333,7 @@ Route::get('/webinars', function () {
 });
 
 Route::get('/webinars/{slug}', [WebinarController::class, 'show'])->name('webinars.show');
+Route::post('/webinars/{slug}/register', [\App\Http\Controllers\WebinarRegistrationController::class, 'store'])->name('webinar.registration.store');
 
 // Keep old /blogs routes for backward compatibility (redirect to /news)
 Route::get('/blogs', function () {
@@ -346,6 +347,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('blogs', AdminBlogController::class);
     Route::resource('webinars', AdminWebinarController::class);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    Route::get('webinar-registrations', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'index'])->name('webinar-registrations.index');
+    Route::get('webinar-registrations/{webinar}', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'show'])->name('webinar-registrations.show');
+    Route::delete('webinar-registrations/{id}', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'destroy'])->name('webinar-registrations.destroy');
 });
 
 // Catch-all route for other HTML pages in smartpath (must be last)

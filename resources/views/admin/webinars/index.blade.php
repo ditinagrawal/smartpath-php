@@ -26,9 +26,10 @@
                             <th style="width: 80px">Image</th>
                             <th>Title</th>
                             <th>Event Date</th>
+                            <th>Registrations</th>
                             <th>Status</th>
                             <th>Created</th>
-                            <th style="width: 150px">Actions</th>
+                            <th style="width: 200px">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,6 +55,11 @@
                                     @endif
                                 </td>
                                 <td>
+                                    <a href="{{ route('admin.webinar-registrations.show', $webinar->id) }}" class="badge badge-info">
+                                        <i class="fas fa-users"></i> {{ $webinar->registrations_count ?? 0 }}
+                                    </a>
+                                </td>
+                                <td>
                                     @if($webinar->is_published)
                                         <span class="badge badge-success">
                                             <i class="fas fa-check"></i> Published
@@ -69,6 +75,9 @@
                                     <div class="btn-group">
                                         <a href="{{ url('/webinars/' . $webinar->slug) }}" class="btn btn-sm btn-info" target="_blank" title="View">
                                             <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('admin.webinar-registrations.show', $webinar->id) }}" class="btn btn-sm btn-success" title="View Registrations">
+                                            <i class="fas fa-users"></i>
                                         </a>
                                         <a href="{{ route('admin.webinars.edit', $webinar->id) }}" class="btn btn-sm btn-primary" title="Edit">
                                             <i class="fas fa-edit"></i>

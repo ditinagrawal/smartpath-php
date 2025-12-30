@@ -15,7 +15,7 @@ class WebinarController extends Controller
      */
     public function index()
     {
-        $webinars = Webinar::latest()->paginate(10);
+        $webinars = Webinar::withCount('registrations')->latest()->paginate(10);
         return view('admin.webinars.index', compact('webinars'));
     }
 
@@ -38,7 +38,6 @@ class WebinarController extends Controller
             'event_date' => 'required|date',
             'event_time' => 'nullable|max:100',
             'location' => 'nullable|max:255',
-            'registration_link' => 'nullable|url',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -56,16 +55,19 @@ class WebinarController extends Controller
             $image->move($imageDir, $imageName);
             $imagePath = 'images/webinars/' . $imageName;
         }
-
+        
+        $slug = Str::slug($request->input('title'));
+        
         Webinar::create([
             'title' => $request->input('title'),
-            'slug' => Str::slug($request->input('title')),
+            'slug' => $slug,
             'excerpt' => $request->input('excerpt'),
             'content' => $request->input('content'),
             'event_date' => $request->input('event_date'),
             'event_time' => $request->input('event_time'),
             'location' => $request->input('location'),
-            'registration_link' => $request->input('registration_link'),
+            // Automatically set registration link to the webinar details URL
+            'registration_link' => url('/webinars/' . $slug),
             'is_published' => $request->has('is_published'),
             'image' => $imagePath,
         ]);
@@ -102,7 +104,6 @@ class WebinarController extends Controller
             'event_date' => 'required|date',
             'event_time' => 'nullable|max:100',
             'location' => 'nullable|max:255',
-            'registration_link' => 'nullable|url',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -138,15 +139,18 @@ class WebinarController extends Controller
             $imagePath = null;
         }
         
+        $slug = Str::slug($request->input('title'));
+        
         $webinar->update([
             'title' => $request->input('title'),
-            'slug' => Str::slug($request->input('title')),
+            'slug' => $slug,
             'excerpt' => $request->input('excerpt'),
             'content' => $request->input('content'),
             'event_date' => $request->input('event_date'),
             'event_time' => $request->input('event_time'),
             'location' => $request->input('location'),
-            'registration_link' => $request->input('registration_link'),
+            // Automatically set registration link to the webinar details URL
+            'registration_link' => url('/webinars/' . $slug),
             'is_published' => $request->has('is_published'),
             'image' => $imagePath,
         ]);
