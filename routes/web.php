@@ -46,6 +46,20 @@ if (!function_exists('serveSmartPathHtml')) {
         // Fix inline style backgrounds (handle both single and double quotes)
         $content = preg_replace('/url\(["\']?assets\//', 'url("/smartpath/assets/', $content);
         
+        // Inject CSRF token meta tag in the head section
+        $csrfToken = csrf_token();
+        $csrfMetaTag = '<meta name="csrf-token" content="' . $csrfToken . '">';
+        
+        // Add CSRF token meta tag if not already present
+        if (strpos($content, 'name="csrf-token"') === false) {
+            // Insert after <head> tag or before </head> tag
+            if (preg_match('/<head[^>]*>/i', $content)) {
+                $content = preg_replace('/(<head[^>]*>)/i', '$1' . "\n    " . $csrfMetaTag, $content);
+            } elseif (preg_match('/<\/head>/i', $content)) {
+                $content = preg_replace('/(<\/head>)/i', '    ' . $csrfMetaTag . "\n$1", $content);
+            }
+        }
+        
         // Fix internal HTML page links
         // Map specific pages to their routes
         $pageMap = [
@@ -379,6 +393,9 @@ Route::get('/webinars', function () {
 Route::get('/webinars/{slug}', [WebinarController::class, 'show'])->name('webinars.show');
 Route::post('/webinars/{slug}/register', [\App\Http\Controllers\WebinarRegistrationController::class, 'store'])->name('webinar.registration.store');
 
+// Contact form submission
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+
 // Keep old /blogs routes for backward compatibility (redirect to /news)
 Route::get('/blogs', function () {
     return redirect('/news', 301);
@@ -394,6 +411,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('webinar-registrations', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'index'])->name('webinar-registrations.index');
     Route::get('webinar-registrations/{webinar}', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'show'])->name('webinar-registrations.show');
     Route::delete('webinar-registrations/{id}', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'destroy'])->name('webinar-registrations.destroy');
+    Route::get('contact-submissions', [\App\Http\Controllers\Admin\ContactSubmissionController::class, 'index'])->name('contact-submissions.index');
+    Route::get('contact-submissions/{id}', [\App\Http\Controllers\Admin\ContactSubmissionController::class, 'show'])->name('contact-submissions.show');
+    Route::delete('contact-submissions/{id}', [\App\Http\Controllers\Admin\ContactSubmissionController::class, 'destroy'])->name('contact-submissions.destroy');
 });
 
 // Catch-all route for other HTML pages in smartpath (must be last)

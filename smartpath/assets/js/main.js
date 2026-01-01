@@ -1032,11 +1032,68 @@ function initHelpFormPopup() {
     if (form) {
       form.addEventListener("submit", function(e) {
         e.preventDefault();
-        // You can add form submission logic here
-        alert("Thank you! We will contact you soon.");
-        overlay.style.display = "none";
-        form.reset();
+        
+        const formData = new FormData(form);
+        const messageDiv = document.getElementById("admissionFormMessage");
+        
+        // Get CSRF token from meta tag or cookie
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         getCookie('XSRF-TOKEN');
+        
+        // Add CSRF token to form data
+        if (csrfToken) {
+          formData.append('_token', csrfToken);
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Submitting...';
+        messageDiv.style.display = 'none';
+        
+        // Submit via AJAX
+        fetch('/contact', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            messageDiv.style.display = 'block';
+            messageDiv.className = 'alert alert-success';
+            messageDiv.textContent = data.message || 'Thank you! We will contact you soon.';
+            form.reset();
+            setTimeout(() => {
+              overlay.style.display = "none";
+              messageDiv.style.display = 'none';
+            }, 2000);
+          } else {
+            throw new Error(data.message || 'An error occurred');
+          }
+        })
+        .catch(error => {
+          messageDiv.style.display = 'block';
+          messageDiv.className = 'alert alert-danger';
+          messageDiv.textContent = error.message || 'Oops! An error occurred. Please try again.';
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        });
       });
+    }
+    
+    // Helper function to get cookie value
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
     }
   }
 }

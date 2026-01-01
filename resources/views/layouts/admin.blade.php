@@ -227,6 +227,24 @@
                             </ul>
                         </li>
 
+                        <!-- Webinar Registrations -->
+                        <li class="nav-item">
+                            <a href="{{ route('admin.webinar-registrations.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.webinar-registrations.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user-check"></i>
+                                <p>Webinar Registrations</p>
+                            </a>
+                        </li>
+
+                        <!-- Contact Submissions -->
+                        <li class="nav-item">
+                            <a href="{{ route('admin.contact-submissions.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.contact-submissions.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-envelope"></i>
+                                <p>Contact Submissions</p>
+                            </a>
+                        </li>
+
                         <!-- Separator -->
                         <li class="nav-header">SETTINGS</li>
 
