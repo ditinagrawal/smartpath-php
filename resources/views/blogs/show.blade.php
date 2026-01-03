@@ -379,18 +379,10 @@
                   </div>
                   <div class="postbox__details-share-wrapper">
                     <div class="row align-items-center">
-                      <div class="col-xl-7 col-lg-7 col-md-7">
+                      <div class="col-12">
                         <div class="postbox__details-tag">
                           <span>Posted in:</span>
                           <a href="#">{{ $blog->category?->name ?? 'News' }}</a>
-                        </div>
-                      </div>
-                      <div class="col-xl-5 col-lg-5 col-md-5">
-                        <div class="postbox__details-share text-lg-end">
-                          <span>Share:</span>
-                          <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                          <a href="https://www.instagram.com/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                          <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->fullUrl()) }}&text={{ urlencode($blog->title) }}" target="_blank"><i class="fab fa-twitter"></i></a>
                         </div>
                       </div>
                     </div>
