@@ -271,6 +271,52 @@ if (!function_exists('serveSmartPathHtml')) {
                 '<!-- NEWS_BLOGS_START -->' . $blogsHtml . '<!-- NEWS_BLOGS_END -->',
                 $content
             );
+
+            // Inject categories into the sidebar
+            try {
+                if (Schema::hasTable('categories')) {
+                    $categories = \App\Models\Category::withCount(['blogs' => function($query) {
+                        $query->where('is_published', true);
+                    }])
+                    ->orderBy('name')
+                    ->get();
+                } else {
+                    $categories = collect();
+                }
+            } catch (\Exception $e) {
+                $categories = collect();
+            }
+
+            $categoriesHtml = '';
+            // Add "All News" link
+            $allBlogsCount = Blog::where('is_published', true)->count();
+            $categoriesHtml .= '
+              <a href="' . url('/news') . '" class="it-sv-details-sidebar-category mb-10" style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit;">
+                <span>All News <span style="color: #999; font-weight: normal;">(' . $allBlogsCount . ')</span></span>
+                <span><i class="fa-light fa-angle-right"></i></span>
+              </a>';
+            
+            if ($categories->count() > 0) {
+                foreach ($categories as $category) {
+                    $categoryUrl = url('/news/category/' . $category->slug);
+                    $isActive = false; // Will be set based on current page context
+                    $activeClass = $isActive ? 'active' : '';
+                    $categoriesHtml .= '
+                      <a href="' . e($categoryUrl) . '" class="it-sv-details-sidebar-category mb-10 ' . $activeClass . '" style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit;">
+                        <span>' . e($category->name) . ' <span style="color: #999; font-weight: normal;">(' . $category->blogs_count . ')</span></span>
+                        <span><i class="fa-light fa-angle-right"></i></span>
+                      </a>';
+                }
+            } else {
+                $categoriesHtml .= '<div class="it-sv-details-sidebar-category mb-10">No categories available</div>';
+            }
+
+            // Replace categories content between markers
+            $content = preg_replace(
+                '/<!-- CATEGORIES_START -->(.*?)<!-- CATEGORIES_END -->/s',
+                '<!-- CATEGORIES_START -->' . $categoriesHtml . '<!-- CATEGORIES_END -->',
+                $content
+            );
         }
         
         // Inject dynamic webinars into the webinars page
@@ -378,6 +424,7 @@ Route::get('/news', function () {
     }
 });
 
+Route::get('/news/category/{slug}', [BlogController::class, 'category'])->name('news.category');
 Route::get('/news/{slug}', [BlogController::class, 'show'])->name('news.show');
 
 // Webinars routes
