@@ -291,9 +291,8 @@ if (!function_exists('serveSmartPathHtml')) {
             // Add "All News" link
             $allBlogsCount = Blog::where('is_published', true)->count();
             $categoriesHtml .= '
-              <a href="' . url('/news') . '" class="it-sv-details-sidebar-category mb-10" style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit;">
+              <a href="' . url('/news') . '" class="it-sv-details-sidebar-category mb-10" style="display: block; text-decoration: none; color: inherit;">
                 <span>All News <span style="color: #999; font-weight: normal;">(' . $allBlogsCount . ')</span></span>
-                <span><i class="fa-light fa-angle-right"></i></span>
               </a>';
             
             if ($categories->count() > 0) {
@@ -302,9 +301,8 @@ if (!function_exists('serveSmartPathHtml')) {
                     $isActive = false; // Will be set based on current page context
                     $activeClass = $isActive ? 'active' : '';
                     $categoriesHtml .= '
-                      <a href="' . e($categoryUrl) . '" class="it-sv-details-sidebar-category mb-10 ' . $activeClass . '" style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit;">
+                      <a href="' . e($categoryUrl) . '" class="it-sv-details-sidebar-category mb-10 ' . $activeClass . '" style="display: block; text-decoration: none; color: inherit;">
                         <span>' . e($category->name) . ' <span style="color: #999; font-weight: normal;">(' . $category->blogs_count . ')</span></span>
-                        <span><i class="fa-light fa-angle-right"></i></span>
                       </a>';
                 }
             } else {
