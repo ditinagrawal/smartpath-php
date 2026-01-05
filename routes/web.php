@@ -206,6 +206,80 @@ if (!function_exists('serveSmartPathHtml')) {
                 $newsSectionHtml,
                 $content
             );
+
+            // Inject dynamic webinars into the homepage
+            try {
+                $upcomingWebinars = Webinar::where('is_published', true)
+                    ->where('event_date', '>=', now())
+                    ->orderBy('event_date', 'asc')
+                    ->take(2)
+                    ->get();
+                
+                // If no upcoming webinars, show the next 2 published webinars regardless of date
+                if ($upcomingWebinars->isEmpty()) {
+                    $upcomingWebinars = Webinar::where('is_published', true)
+                        ->orderBy('event_date', 'desc')
+                        ->take(2)
+                        ->get();
+                }
+            } catch (\Exception $e) {
+                // Fallback if there's any error
+                $upcomingWebinars = Webinar::where('is_published', true)
+                    ->orderBy('event_date', 'desc')
+                    ->take(2)
+                    ->get();
+            }
+
+            $webinarsHtml = '';
+
+            foreach ($upcomingWebinars as $webinar) {
+                $imageUrl = $webinar->image_url ?? '/smartpath/assets/img/event/event-1-1.jpg';
+                $webinarUrl = url('/webinars/' . $webinar->slug);
+                $day = $webinar->event_date?->format('d') ?? '';
+                $month = $webinar->event_date?->format('F') ?? ''; // Full month name (October, November, etc.)
+                $excerpt = Str::limit(strip_tags($webinar->excerpt ?? $webinar->content), 100);
+
+                $webinarsHtml .= '
+            <div class="col-xl-6 col-lg-6 col-md-6 mb-30">
+              <div class="it-event-2-item-box">
+                <div class="it-event-2-item">
+                  <div class="it-event-2-thumb fix" style="overflow: hidden; position: relative;">
+                    <a href="' . e($webinarUrl) . '" style="display: block; height: 100%;">
+                      <img src="' . e($imageUrl) . '" alt="' . e($webinar->title) . '" style="width: 100%; height: 300px; object-fit: cover; display: block;" />
+                    </a>
+                    <div class="it-event-2-date">
+                      <span><i>' . e($day) . '</i> <br />' . e($month) . '</span>
+                    </div>
+                  </div>
+                  <div class="it-event-2-content">
+                    <h4 class="it-event-2-title">
+                      <a href="' . e($webinarUrl) . '">' . e($webinar->title) . '</a>
+                    </h4>
+                    <div class="it-event-2-text">
+                      <p class="mb-0 pb-10">' . e($excerpt) . '</p>
+                    </div>
+                    <div class="it-event-2-meta">
+                      ' . ($webinar->event_time ? '<span><i class="fa-light fa-clock"></i> Time: ' . e($webinar->event_time) . '</span>' : '') . '
+                      ' . ($webinar->location ? '<span><i class="fa-light fa-location-dot"></i> ' . e($webinar->location) . '</span>' : '') . '
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>';
+            }
+
+            // If no webinars, leave the section empty (or you could add a fallback message)
+            $webinarsSectionHtml = '<!-- WEBINARS_SECTION_START -->
+          <div class="row">
+' . $webinarsHtml . '
+          </div>
+          <!-- WEBINARS_SECTION_END -->';
+
+            $content = preg_replace(
+                '/<!-- WEBINARS_SECTION_START -->(.*?)<!-- WEBINARS_SECTION_END -->/s',
+                $webinarsSectionHtml,
+                $content
+            );
         }
         
         // Inject dynamic blogs into the news page
@@ -337,8 +411,8 @@ if (!function_exists('serveSmartPathHtml')) {
               <div class="it-event-2-item-box" style="overflow: hidden;">
                 <div class="it-event-2-item">
                   <div class="it-event-2-thumb fix" style="overflow: hidden; position: relative;">
-                    <a href="' . e($webinarUrl) . '" style="display: block; overflow: hidden;">
-                      <img src="' . e($imageUrl) . '" alt="' . e($webinar->title) . '" style="width: 100%; height: auto; object-fit: cover; display: block;" />
+                    <a href="' . e($webinarUrl) . '" style="display: block; height: 100%;">
+                      <img src="' . e($imageUrl) . '" alt="' . e($webinar->title) . '" style="width: 100%; height: 300px; object-fit: cover; display: block;" />
                     </a>
                     <div class="it-event-2-date" style="overflow: hidden;">
                       <span><i>' . e($day) . '</i> <br />' . e($month) . '</span>
