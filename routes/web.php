@@ -515,6 +515,20 @@ Route::post('/webinars/{slug}/register', [\App\Http\Controllers\WebinarRegistrat
 // Contact form submission
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 
+// Serve uploaded blog content images
+Route::get('/images/blogs/content/{filename}', function ($filename) {
+    $path = public_path('images/blogs/content/' . $filename);
+    
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    
+    $file = file_get_contents($path);
+    $type = mime_content_type($path);
+    
+    return response($file, 200)->header('Content-Type', $type);
+})->where('filename', '[A-Za-z0-9_\-\.]+');
+
 // Keep old /blogs routes for backward compatibility (redirect to /news)
 Route::get('/blogs', function () {
     return redirect('/news', 301);
@@ -527,6 +541,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('blogs', AdminBlogController::class);
     Route::resource('webinars', AdminWebinarController::class);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    Route::post('ckeditor/upload', [\App\Http\Controllers\Admin\CkeditorImageUploadController::class, 'upload'])->name('ckeditor.upload');
     Route::get('webinar-registrations', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'index'])->name('webinar-registrations.index');
     Route::get('webinar-registrations/{webinar}', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'show'])->name('webinar-registrations.show');
     Route::delete('webinar-registrations/{id}', [\App\Http\Controllers\Admin\WebinarRegistrationController::class, 'destroy'])->name('webinar-registrations.destroy');
@@ -560,6 +575,6 @@ Route::get('/{page}', function ($page) {
         \Log::error("Error serving {$htmlFile}: " . $e->getMessage());
         abort(404);
     }
-})->where('page', '^(?!dashboard|blogs|news|webinars|admin|login|register|forgot-password|reset-password|verify-email|confirm-password|profile|api|smartpath|assets|build|storage|favicon|robots)[^\/]*$');
+})->where('page', '^(?!dashboard|blogs|news|webinars|admin|login|register|forgot-password|reset-password|verify-email|confirm-password|profile|api|smartpath|assets|build|storage|favicon|robots|images)[^\/]*$');
 
 require __DIR__.'/auth.php';

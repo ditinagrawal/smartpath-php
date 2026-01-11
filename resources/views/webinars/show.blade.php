@@ -392,7 +392,13 @@
                 @endif
                 <div class="it-evn-details-text">
                   <div class="postbox__text">
-                    {!! Str::markdown($webinar->content) !!}
+                    @php
+                      // Check if content is HTML (contains HTML tags) or markdown
+                      $content = $webinar->content;
+                      $isHtml = preg_match('/<[a-z][\s\S]*>/i', $content);
+                      $displayContent = $isHtml ? $content : Str::markdown($content);
+                    @endphp
+                    {!! $displayContent !!}
                   </div>
                 </div>
               </div>

@@ -224,6 +224,96 @@
 <script>
     let editorInstance;
     
+    // Custom upload adapter for CKEditor
+    class CustomUploadAdapter {
+        constructor(loader) {
+            this.loader = loader;
+        }
+
+        upload() {
+            return this.loader.file
+                .then(file => new Promise((resolve, reject) => {
+                    this._initRequest();
+                    this._initListeners(resolve, reject, file);
+                    this._sendRequest(file);
+                }));
+        }
+
+        abort() {
+            if (this.xhr) {
+                this.xhr.abort();
+            }
+        }
+
+        _initRequest() {
+            const xhr = this.xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ route("admin.ckeditor.upload") }}', true);
+            xhr.setRequestHeader('X-CSRF-TOKEN', '{{ csrf_token() }}');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.responseType = 'json';
+        }
+
+        _initListeners(resolve, reject, file) {
+            const xhr = this.xhr;
+            const loader = this.loader;
+            const genericErrorText = `Couldn't upload file: ${file.name}.`;
+
+            xhr.addEventListener('error', () => reject(genericErrorText));
+            xhr.addEventListener('abort', () => reject());
+            xhr.addEventListener('load', () => {
+                // Check HTTP status
+                if (xhr.status !== 200) {
+                    return reject(`Upload failed with status ${xhr.status}`);
+                }
+
+                const response = xhr.response;
+
+                // Check if response is valid
+                if (!response) {
+                    return reject('Invalid response from server');
+                }
+
+                // Check if upload was successful
+                if (!response.uploaded || response.error) {
+                    const errorMsg = response.error && response.error.message 
+                        ? response.error.message 
+                        : (response.error || 'Upload failed');
+                    return reject(errorMsg);
+                }
+
+                // Ensure URL is absolute
+                let imageUrl = response.url;
+                if (!imageUrl) {
+                    return reject('No URL returned from server');
+                }
+
+                // Make URL absolute if needed
+                if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+                    imageUrl = window.location.origin + (imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl);
+                }
+
+                resolve({
+                    default: imageUrl
+                });
+            });
+
+            if (xhr.upload) {
+                xhr.upload.addEventListener('progress', evt => {
+                    if (evt.lengthComputable) {
+                        loader.uploadTotal = evt.total;
+                        loader.uploaded = evt.loaded;
+                    }
+                });
+            }
+        }
+
+        _sendRequest(file) {
+            const data = new FormData();
+            data.append('upload', file);
+            this.xhr.send(data);
+        }
+    }
+
     // Initialize CKEditor
     ClassicEditor
         .create(document.querySelector('#content'), {
@@ -233,7 +323,7 @@
                     'bold', 'italic', 'underline', 'strikethrough', '|',
                     'bulletedList', 'numberedList', '|',
                     'blockQuote', 'codeBlock', '|',
-                    'link', 'insertTable', '|',
+                    'link', 'insertImage', 'insertTable', '|',
                     'undo', 'redo'
                 ]
             },
@@ -249,6 +339,11 @@
         })
         .then(editor => {
             editorInstance = editor;
+            
+            // Set up custom upload adapter
+            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                return new CustomUploadAdapter(loader);
+            };
         })
         .catch(error => {
             console.error(error);
