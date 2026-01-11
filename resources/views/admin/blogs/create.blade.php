@@ -41,12 +41,12 @@
                         <!-- Content -->
                         <div class="form-group">
                             <label for="content">Content <span class="text-danger">*</span></label>
-                            <textarea class="form-control @error('content') is-invalid @enderror" id="content" name="content" rows="15" placeholder="Write your blog content here using Markdown..." required>{{ old('content') }}</textarea>
+                            <textarea class="form-control @error('content') is-invalid @enderror" id="content" name="content">{{ old('content') }}</textarea>
                             @error('content')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                             <small class="form-text text-muted">
-                                <i class="fab fa-markdown"></i> Markdown supported: **bold**, *italic*, # heading, - lists, `code`, [links](url), ![images](url)
+                                <i class="fas fa-edit"></i> Use the toolbar above to format your content with headings, bold, italic, lists, and more.
                             </small>
                         </div>
                     </div>
@@ -143,48 +143,76 @@
                         <li class="mb-2">Upload a <strong>featured image</strong> to make your blog more attractive.</li>
                         <li class="mb-2">Use the <strong>category</strong> to organize your blogs.</li>
                         <li class="mb-2">Uncheck <strong>publish</strong> to save as a draft that won't be visible to visitors.</li>
-                        <li><strong>Markdown</strong> is supported in content for formatting.</li>
+                        <li>Use the <strong>editor toolbar</strong> to format your content with headings, bold, italic, lists, and more.</li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Markdown Help Card -->
-            <div class="card card-secondary collapsed-card">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fab fa-markdown"></i> Markdown Cheatsheet</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body" style="display: none;">
-                    <table class="table table-sm table-bordered">
-                        <tr><td><code># Heading 1</code></td><td>Large heading</td></tr>
-                        <tr><td><code>## Heading 2</code></td><td>Medium heading</td></tr>
-                        <tr><td><code>**bold**</code></td><td><strong>bold</strong></td></tr>
-                        <tr><td><code>*italic*</code></td><td><em>italic</em></td></tr>
-                        <tr><td><code>[link](url)</code></td><td>Hyperlink</td></tr>
-                        <tr><td><code>![alt](image-url)</code></td><td>Image</td></tr>
-                        <tr><td><code>- item</code></td><td>Bullet list</td></tr>
-                        <tr><td><code>1. item</code></td><td>Numbered list</td></tr>
-                        <tr><td><code>`code`</code></td><td>Inline code</td></tr>
-                        <tr><td><code>> quote</code></td><td>Blockquote</td></tr>
-                        <tr><td><code>---</code></td><td>Horizontal line</td></tr>
-                    </table>
-                </div>
-            </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
+<!-- CKEditor -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
 <script>
-    // Update file input label
-    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
-        var fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file';
-        e.target.nextElementSibling.textContent = fileName;
+    let editorInstance;
+    
+    // Initialize CKEditor
+    ClassicEditor
+        .create(document.querySelector('#content'), {
+            toolbar: {
+                items: [
+                    'heading', '|',
+                    'bold', 'italic', 'underline', 'strikethrough', '|',
+                    'bulletedList', 'numberedList', '|',
+                    'blockQuote', 'codeBlock', '|',
+                    'link', 'insertTable', '|',
+                    'undo', 'redo'
+                ]
+            },
+            heading: {
+                options: [
+                    { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                    { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                    { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                    { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
+                    { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' }
+                ]
+            }
+        })
+        .then(editor => {
+            editorInstance = editor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    // Update textarea before form submission and validate
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (editorInstance) {
+            // Update the textarea with editor content
+            editorInstance.updateSourceElement();
+            
+            // Validate that content is not empty
+            const content = editorInstance.getData().trim();
+            if (!content) {
+                e.preventDefault();
+                alert('Please enter blog content.');
+                editorInstance.focus();
+                return false;
+            }
+        }
     });
+
+    // Update file input label
+    const fileInput = document.querySelector('.custom-file-input');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            var fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file';
+            e.target.nextElementSibling.textContent = fileName;
+        });
+    }
 
     function previewImage(input) {
         if (input.files && input.files[0]) {

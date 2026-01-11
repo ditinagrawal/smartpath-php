@@ -374,7 +374,13 @@
                   </div>
                   <div class="postbox__content pb-20">
                     <div class="postbox__text">
-                      {!! Str::markdown($blog->content) !!}
+                      @php
+                        // Check if content is HTML (contains HTML tags) or markdown
+                        $content = $blog->content;
+                        $isHtml = preg_match('/<[a-z][\s\S]*>/i', $content);
+                        $displayContent = $isHtml ? $content : Str::markdown($content);
+                      @endphp
+                      {!! $displayContent !!}
                     </div>
                   </div>
                   <div class="postbox__details-share-wrapper">
