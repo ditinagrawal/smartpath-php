@@ -27,6 +27,153 @@
     <link rel="stylesheet" href="/smartpath/assets/css/magnific-popup.css" />
     <link rel="stylesheet" href="/smartpath/assets/css/spacing.css" />
     <link rel="stylesheet" href="/smartpath/assets/css/main.css" />
+    
+    <!-- CKEditor Content Styling -->
+    <style>
+    .postbox__text {
+        line-height: 1.8;
+    }
+
+    .postbox__text p {
+        margin-bottom: 1.5em;
+        font-size: 17px;
+        line-height: 1.8;
+    }
+
+    .postbox__text h1,
+    .postbox__text h2,
+    .postbox__text h3,
+    .postbox__text h4,
+    .postbox__text h5,
+    .postbox__text h6 {
+        margin-top: 1.5em;
+        margin-bottom: 1em;
+        font-weight: 600;
+        line-height: 1.3;
+        color: #202124;
+    }
+
+    .postbox__text h1 {
+        font-size: 32px;
+    }
+
+    .postbox__text h2 {
+        font-size: 28px;
+    }
+
+    .postbox__text h3 {
+        font-size: 24px;
+    }
+
+    .postbox__text h4 {
+        font-size: 20px;
+    }
+
+    .postbox__text h5 {
+        font-size: 18px;
+    }
+
+    .postbox__text h6 {
+        font-size: 16px;
+    }
+
+    .postbox__text ul,
+    .postbox__text ol {
+        margin-bottom: 1.5em;
+        padding-left: 2em;
+    }
+
+    .postbox__text ul li,
+    .postbox__text ol li {
+        margin-bottom: 0.5em;
+        line-height: 1.8;
+    }
+
+    .postbox__text ul {
+        list-style-type: disc;
+    }
+
+    .postbox__text ol {
+        list-style-type: decimal;
+    }
+
+    .postbox__text blockquote {
+        margin: 1.5em 0;
+        padding: 1em 1.5em;
+        border-left: 4px solid #c9a96e;
+        background-color: #f9f9f9;
+        font-style: italic;
+    }
+
+    .postbox__text code {
+        background-color: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+
+    .postbox__text pre {
+        background-color: #f4f4f4;
+        padding: 1em;
+        border-radius: 5px;
+        overflow-x: auto;
+        margin-bottom: 1.5em;
+    }
+
+    .postbox__text pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .postbox__text table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5em;
+    }
+
+    .postbox__text table th,
+    .postbox__text table td {
+        padding: 0.75em;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .postbox__text table th {
+        background-color: #f9f9f9;
+        font-weight: 600;
+    }
+
+    .postbox__text img {
+        max-width: 100%;
+        height: auto;
+        margin: 1.5em 0;
+        border-radius: 5px;
+    }
+
+    .postbox__text a {
+        color: #c9a96e;
+        text-decoration: underline;
+    }
+
+    .postbox__text a:hover {
+        color: #b8975d;
+    }
+
+    .postbox__text strong {
+        font-weight: 600;
+    }
+
+    .postbox__text em {
+        font-style: italic;
+    }
+
+    .postbox__text hr {
+        margin: 2em 0;
+        border: none;
+        border-top: 1px solid #ddd;
+    }
+    </style>
   </head>
 
   <body>
